@@ -7,9 +7,6 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
-<!--    <script src="js/jquery.min.js" />-->
-<!--    <script src="js/bootstrap.js" />-->
-<!--    <script src="js/bootbox.js" />-->
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
@@ -24,9 +21,6 @@
             <div class="col-sm-7 col-sm-offset-2">
                 <h1>Edit Photos</h1>
             </div>
-            <div class="col-sm-1">
-                <img src="img/zerorenovation_logo.png" 　alt="ゼロリノベ ロゴ">
-            </div>
         </div>
     </header>
     <hr>
@@ -36,8 +30,10 @@
                 <p>選択したフォルダ内のjpg/pngファイルのサイズとファイル名を変更します</p>
             </div>
             <div class="form-group">
-                <label for="photo-folder-path">写真フォルダ</label>
-                <input id="photo-file" type="file" style="display:none" class="form-control" webkitdirectory directory>
+                <label for="photo-folder-path">写真ファイル</label>
+                <label for="select-as-folder" style="font-size: 10px;">※フォルダで指定する</label>
+                <input id="select-as-folder" type="checkbox" value="1">
+                <input id="photo-file" type="file" style="display:none" class="form-control" multiple>
                 <div class="input-group">
                     <input type="text" id="photo-folder-path" class="form-control readonly" placeholder="select file..." required>
                     <span class="input-group-btn"><button type="button" class="btn btn-info" onclick="$('#photo-file').click();">Browse</button></span>
@@ -82,6 +78,17 @@
             alert('ブラウザが非対応です。最新版のブラウザをご使用ください。');
         }
     })
+    $('#select-as-folder').change(function() {
+      if($(this).prop("checked")){
+        $('#photo-file').prop("webkitdirectory", true);
+        $('#photo-file').prop("multiple", false);
+        $('#photo-folder-path').attr("placeholder","select folder...")
+      } else {
+        $('#photo-file').prop("webkitdirectory", false);
+        $('#photo-file').prop("multiple", true);
+        $('#photo-folder-path').attr("placeholder","select files...")
+      }
+    });
     let photoFilesArray = [];
     $('input[type=file]').change(function() {
         let selectedFolderName;
@@ -132,7 +139,7 @@
             let reader = new FileReader();
             reader.onload = function() {
                 let imgData = reader.result;
-                downloadResizeFile(imgData, fileType, size, quality, buildFileName(filename, parseInt(filenameIndex) + i));
+                downloadResizeFile(imgData, fileType, size, quality, buildFileName(file.name, filename, parseInt(filenameIndex) + i));
             };
             reader.readAsDataURL(file);
         }
@@ -187,7 +194,10 @@
         a.click();
     }
 
-    function buildFileName(baseFileName, index) {
+    function buildFileName(orgFileName, baseFileName, index) {
+        if(baseFileName == ""){
+          return orgFileName;
+        }
         let fileIndex;
         if(index < 10) {
             fileIndex = "0" + index;
